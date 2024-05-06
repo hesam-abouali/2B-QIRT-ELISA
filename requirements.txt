@@ -5,4 +5,4 @@ pandas
 matplotlib
 seaborn
 plotly
-!pip install peakutils
+peakutils
