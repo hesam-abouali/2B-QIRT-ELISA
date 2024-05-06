@@ -1,6 +1,4 @@
+streamlit
 NumPy
 SciPy
 pandas
-seaborn
-scipy.signal
-PeakUtils
