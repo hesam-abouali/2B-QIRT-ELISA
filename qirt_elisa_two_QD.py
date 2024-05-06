@@ -6,7 +6,7 @@ import seaborn as sns
 import matplotlib.pyplot as plt
 import datetime
 #Imports------------
-from streamlit_option_menu import option_menu
+#from streamlit_option_menu import option_menu
 from pandas import Series, DataFrame
 from scipy.signal import find_peaks as fp
 from scipy.signal import savgol_filter
