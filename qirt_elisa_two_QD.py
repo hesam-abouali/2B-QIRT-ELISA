@@ -20,7 +20,7 @@ st.set_page_config(page_icon=None, layout="wide", initial_sidebar_state='auto')
 st.title("Two Biomarker QIRT-ELISA Peak Data Analysis")
 #------------
 #Setup tabs
-tab1, tab2, tab3, tab4, tab5 = st.tabs(["Data Loading", "Signal Smoothing", "Baseline Correction", "Peak Analysis", "Results"])
+tab1, tab2, tab3, tab4 = st.tabs(["Data Loading", "Baseline Correction", "Peak Analysis", "Results"])
 #------------
 #Load data
 with tab1:
@@ -54,104 +54,40 @@ with tab1:
     if multiplier2 is 1:
         st.info(" Please enter the sensitivities values", icon="ℹ️")
         st.stop() 
-    st.sidebar.info('Move to the *Signal Smoothing* tab once you have entered your preamplifier sensitivities.', icon="1️⃣")
+    st.sidebar.info('Move to the *Baseline correction* tab once you have entered your preamplifier sensitivities.', icon="1️⃣")
     with st.expander("Data Preview"):
-            st.dataframe(df)
+            st.dataframe(df) 
 with tab2:
-    st.header('Signal Smoothing')
-    st.write('By default, there is no signal smoothing. Please check the boxes below to apply a Savitzky-Golay smoothing filter if necessary.',icon="1️⃣")    
-    col1, col2 = st.columns(2) 
-    with col1:
-        st.header("QDot 605")
-        filter_window1 = 1
-        order_value1 = 0
-        Signal605_smoothed = savgol_filter(df.Signal605, filter_window1, order_value1, deriv=0, delta=1.0, axis=-1, mode='interp', cval=0.0)      
-        fig_smooth_605 = plt.figure(figsize=(9, 7))
-        sns.lineplot(y =Signal605_smoothed, x = df.time, label = "QDot 605 Signal")
-        plt.xlabel("Time [sec]")
-        plt.ylabel("Fluorscent Signal [pA]")
-        plt.title("Signals")
-        st.pyplot(fig_smooth_605)
-        change_smooth_605 = st.checkbox("Apply a signal smoothing filter for QDot 605")
-        if change_smooth_605:
-            filter_window1 = st.number_input("Length of the filter window", min_value=1  , max_value=None, value=None, placeholder="Type a number...", key='fw1', help = 'Please enter a value less the length of your data frame. For no signal smoothing, enter 1')
-            if filter_window1 is None:
-                st.info(" Please choose a filter window", icon="ℹ️")
-                st.stop() 
-            order_value1 = st.number_input("Order of the polynomial", min_value=0, max_value=filter_window1, value=None, placeholder="Type a number...", key='ov1', help = 'Please enter a value less the filter window. For no signal smoothing, enter 0')
-            if order_value1 is None:
-                st.info(" Please choose the order of the filter", icon="ℹ️")
-                st.stop() 
-            Signal605_smoothed = savgol_filter(df.Signal605, filter_window1, order_value1, deriv=0, delta=1.0, axis=-1, mode='interp', cval=0.0)
-            fig_smooth_605 = plt.figure(figsize=(9, 7))
-            sns.lineplot(y =df.Signal605, x = df.time, label = "605 Raw Signal") 
-            sns.lineplot(y =Signal605_smoothed, x = df.time, label = "QDot 605 Signal")
-            plt.xlabel("Time [sec]")
-            plt.ylabel("Fluorscent Signal [pA]")
-            plt.title("Signals")
-            st.pyplot(fig_smooth_605)
-    with col2:
-        st.header("QDot 655")
-        filter_window2 = 1
-        order_value2 = 0
-        Signal655_smoothed = savgol_filter(df.Signal655, filter_window2, order_value2, deriv=0, delta=1.0, axis=-1, mode='interp', cval=0.0)
-        fig_smooth_655 = plt.figure(figsize=(9, 7))   
-        sns.lineplot(y =Signal655_smoothed, x = df.time, label = "QDot 655 Signal")
-        plt.title("Signals")
-        plt.xlabel("Time [sec]")
-        plt.ylabel("Fluorscent Signal [pA]")
-        st.pyplot(fig_smooth_655)
-        st.sidebar.info('Move to the *Baseline correction* tab if you are satisfied with your filter selection.', icon="2️⃣")
-        change_smooth_655 = st.checkbox("Apply a signal smoothing filter for QDot 655")
-        if change_smooth_655:
-            filter_window2 = st.number_input("Length of the filter window", min_value=1  , max_value=None, value=None, placeholder="Type a number...", key='fw2', help = 'Please enter a value less the length of your data frame. For no signal smoothing, enter 1')
-            if filter_window2 is None:
-                st.info(" Please choose a filter window", icon="ℹ️")
-                st.stop() 
-            order_value2 = st.number_input("Order of the polynomial", min_value=0, max_value=filter_window2, value=None, placeholder="Type a number...", key='ov2', help = 'Please enter a value less the filter window. For no signal smoothing, enter 0')
-            if order_value2 is None:
-                st.info(" Please choose the order of the filter", icon="ℹ️")
-                st.stop()  
-            Signal655_smoothed = savgol_filter(df.Signal655, filter_window2, order_value2, deriv=0, delta=1.0, axis=-1, mode='interp', cval=0.0)
-            fig_smooth_655 = plt.figure(figsize=(9, 7))   
-            sns.lineplot(y =df.Signal655, x = df.time, label = "655 Raw Signal")
-            sns.lineplot(y =Signal655_smoothed, x = df.time, label = "QDot 655 Signal")
-            plt.title("Signals")
-            plt.xlabel("Time [sec]")
-            plt.ylabel("Fluorscent Signal [pA]")
-            st.pyplot(fig_smooth_655) 
-with tab3:
     st.header('Baseline Correction')
     st.write('Remove the background noise.')
     col1, col2 = st.columns(2)
     with col1:
      base_deg1 = 100
-     base_line1 = baseline(Signal605_smoothed, deg = base_deg1) 
-     Signal605_smoothed_adjusted = Signal605_smoothed - base_line1 
+     base_line1 = baseline(df.Signal605, deg = base_deg1) 
+     df.Signal605_adjusted = df.Signal605 - base_line1 
      fig_baseline_605 = plt.figure(figsize=(9, 7))
      sns.lineplot(y = base_line1, x = df.time, label = "Generated Baseline for QDot 605")
-     sns.lineplot(y = Signal605_smoothed, x = df.time, label = "Adjusted QDot 605 Signal")
+     sns.lineplot(y = df.Signal605, x = df.time, label = "Adjusted QDot 605 Signal")
      plt.title( "Signals")
      plt.xlabel("Time [sec]")
      plt.ylabel("Fluorscent Signal [pA]")
      st.pyplot(fig_baseline_605)
     with col2:
      base_deg2 = 100
-     base_line2 = baseline(Signal655_smoothed, deg = base_deg2) 
-     Signal655_smoothed_adjusted = Signal655_smoothed - base_line2 
-
+     base_line2 = baseline(df.Signal655, deg = base_deg2) 
+     df.Signal655_adjusted = df.Signal655 - base_line2 
      fig_baseline_655 = plt.figure(figsize=(9, 7))
      sns.lineplot(y = base_line2, x = df.time, label = "Generated Baseline for QDot 655")
-     sns.lineplot(y = Signal655_smoothed, x = df.time, label = "Adjusted QDot 655 Signal")
+     sns.lineplot(y = df.Signal655, x = df.time, label = "Adjusted QDot 655 Signal")
      plt.title( "Signals")
      plt.xlabel("Time [sec]")
      plt.ylabel("Fluorscent Signal [pA]")
      st.pyplot(fig_baseline_655)
-     st.sidebar.info('Move to the *Peak Analysis* tab after the signals are adjusted.', icon="3️⃣")
-with tab4:
+     st.sidebar.info('Move to the *Peak Analysis* tab after the signals are adjusted.', icon="2️⃣")
+with tab3:
     st.header('Peak Analysis')
-    df21 = pd.DataFrame({'time': df.time,'Signal':Signal605_smoothed_adjusted}).set_index('time')
-    df22 = pd.DataFrame({'time': df.time,'Signal':Signal655_smoothed_adjusted}).set_index('time') 
+    df21 = pd.DataFrame({'time': df.time,'Signal':df.Signal605_adjusted}).set_index('time')
+    df22 = pd.DataFrame({'time': df.time,'Signal':df.Signal655_adjusted}).set_index('time') 
     st.write('Find the peaks in the adjusted signals and integrate the found peaks.')
     col1, col2 = st.columns(2)
     with col1:
@@ -203,13 +139,13 @@ with tab4:
          sns.scatterplot(data = df22.iloc[peaks22], x = 'time', y = 'Signal', 
                 color = 'red', alpha = 0.5)
          st.pyplot(plt.gcf( ))
-         st.sidebar.info('Move to the *Results* tab if you are satisfied with the identified peaks.', icon="4️⃣")
-with tab5:
+         st.sidebar.info('Move to the *Results* tab if you are satisfied with the identified peaks.', icon="️️3️⃣")
+with tab4:
     st.header('Results')
     col1, col2 = st.columns(2)
     with col1:
-        df21_2 = pd.DataFrame({'time': df.time,'Signal':Signal605_smoothed_adjusted}).set_index('time')
-        df21_3 = pd.DataFrame({'time': df.time,'Signal':Signal605_smoothed_adjusted})
+        df21_2 = pd.DataFrame({'time': df.time,'Signal':df.Signal605_adjusted}).set_index('time')
+        df21_3 = pd.DataFrame({'time': df.time,'Signal':df.Signal605_adjusted})
         time_array_605 = df21_3[["time"]].to_numpy( )
         peak_number_605 = len(peak_found_605['peak_heights'])
         n_605 = 0
@@ -257,8 +193,8 @@ with tab5:
         st.write('The normalized average peak AUC is:', normalized_f_605)
         st.write('The corresponding glucagon concentrations in [pM] is:', gluc_concent)
     with col2:    
-        df22_2 = pd.DataFrame({'time': df.time,'Signal':Signal655_smoothed_adjusted}).set_index('time')
-        df22_3 = pd.DataFrame({'time': df.time,'Signal':Signal655_smoothed_adjusted})
+        df22_2 = pd.DataFrame({'time': df.time,'Signal':df.Signal655_adjusted}).set_index('time')
+        df22_3 = pd.DataFrame({'time': df.time,'Signal':df.Signal655_adjusted})
         time_array_655 = df22_3[["time"]].to_numpy( )
         peak_number_655 = len(peak_found_655['peak_heights'])
         n_655 = 0
